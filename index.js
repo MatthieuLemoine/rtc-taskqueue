@@ -1,4 +1,3 @@
-var detect = require('rtc-core/detect');
 var findPlugin = require('rtc-core/plugin');
 var PriorityQueue = require('priorityqueuejs');
 var Promise = require('es6-promise').Promise;
@@ -83,11 +82,9 @@ module.exports = function(pc, opts) {
   var alwaysParse = (opts.sdpParseMode === 'always');
 
   // initialise session description and icecandidate objects
-  var RTCSessionDescription = (opts || {}).RTCSessionDescription ||
-    detect('RTCSessionDescription');
+  var RTCSessionDescription = (opts || {}).RTCSessionDescription;
 
-  var RTCIceCandidate = (opts || {}).RTCIceCandidate ||
-    detect('RTCIceCandidate');
+  var RTCIceCandidate = (opts || {}).RTCIceCandidate;
 
   // Determine plugin overridable methods
   var createIceCandidate = pluggable(plugin && plugin.createIceCandidate, function(data) {
@@ -321,21 +318,6 @@ module.exports = function(pc, opts) {
       OfferToReceiveAudio: true
     };
 
-    // Handle mozillas slightly different constraint requirements that are
-    // enforced as of FF43
-    if (detect.moz) {
-      allowedKeys = {
-        offertoreceivevideo: 'offerToReceiveVideo',
-        offertoreceiveaudio: 'offerToReceiveAudio',
-        icerestart: 'iceRestart',
-        voiceactivitydetection: 'voiceActivityDetection'
-      };
-      constraints = {
-        offerToReceiveVideo: true,
-        offerToReceiveAudio: true
-      };
-    }
-
     // update known keys to match
     Object.keys(opts || {}).forEach(function(key) {
       if (allowedKeys[key.toLowerCase()]) {
@@ -343,7 +325,7 @@ module.exports = function(pc, opts) {
       }
     });
 
-    return (detect.moz ? constraints : { mandatory: constraints });
+    return { mandatory : constraints };
   }
 
   function hasLocalOrRemoteDesc(pc, task) {
